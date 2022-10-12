@@ -31,25 +31,17 @@ import java.util.Calendar
 class ReaperScans : ParsedHttpSource() {
 
     override val name = "Reaper Scans"
-
     override val baseUrl = "https://reaperscans.com"
-
     override val lang = "en"
-
     override val id = 5177220001642863679
-
-    override val supportsLatest = false
-
+    override val supportsLatest = true
     private val json: Json by injectLazy()
 
+    
     // Popular
-
     override fun popularMangaRequest(page: Int) = GET("$baseUrl/comics?page=$page", headers)
-
     override fun popularMangaNextPageSelector(): String = "button[wire:click*=nextPage]"
-
     override fun popularMangaSelector(): String = "li"
-
     override fun popularMangaFromElement(element: Element): SManga {
         return SManga.create().apply {
             element.select("a.text-white").let {
@@ -61,17 +53,20 @@ class ReaperScans : ParsedHttpSource() {
     }
 
     // Latest
+    override fun latestUpdatesRequest(page: Int): Request = GET("$baseUrl/latest/comics?page=$page", headers)
+    override fun latestUpdatesNextPageSelector(): String? = popularMangaNextPageSelector()
+    override fun latestUpdatesSelector(): String = ".grid > div"
+    override fun latestUpdatesFromElement(element: Element): SManga = SManga.create().apply {
+        thumbnail_url = element.select("img").attr("src")
 
-    override fun latestUpdatesRequest(page: Int): Request = throw UnsupportedOperationException("Not used")
+        element.select("p > a").first().apply {
+            title = this.text().trim()
+            url = URI(this.attr("href")).path
+        }
+    }
 
-    override fun latestUpdatesSelector() = throw UnsupportedOperationException("Not used")
-
-    override fun latestUpdatesFromElement(element: Element): SManga = throw UnsupportedOperationException("Not used")
-
-    override fun latestUpdatesNextPageSelector() = throw UnsupportedOperationException("Not used")
 
     // Details
-
     override fun mangaDetailsParse(document: Document): SManga = SManga.create().apply {
         thumbnail_url = document.select("div > img").first().attr("abs:src")
         title = document.select("h1").first().text()
