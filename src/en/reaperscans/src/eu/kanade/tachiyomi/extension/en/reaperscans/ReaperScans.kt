@@ -26,6 +26,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import uy.kohesive.injekt.injectLazy
+import java.net.URI
 import java.util.Calendar
 
 class ReaperScans : ParsedHttpSource() {
